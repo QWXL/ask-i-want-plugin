@@ -1,0 +1,61 @@
+body:
+  - type: input
+    attributes:
+      name: model
+      label: "Model Name:"
+      defaultValue: "qwen3:4b"
+      description: "Model to use. Examples: qwen3:4b (Ollama), gpt-4o (OpenAI), deepseek-chat (DeepSeek)"
+  - type: input
+    attributes:
+      name: api_base_url
+      label: "API Base URL:"
+      defaultValue: "http://localhost:11434"
+      description: "API endpoint. Ollama: http://localhost:11434 | OpenAI: https://api.openai.com | DeepSeek: https://api.deepseek.com"
+  - type: input
+    attributes:
+      name: api_key
+      label: "API Key:"
+      defaultValue: ""
+      description: "Required for cloud providers (OpenAI, DeepSeek, etc.). Leave empty for local Ollama."
+  - type: input
+    attributes:
+      name: tavily_api_key
+      label: "Tavily API Key:"
+      defaultValue: ""
+      description: "Required for web search."
+  - type: input
+    attributes:
+      name: max_results
+      label: "Max Search Results (1-3):"
+      defaultValue: "3"
+      description: "Number of search results to include."
+  - type: checkbox
+    attributes:
+      name: enable_web_search
+      label: "Enable web search by default:"
+      description: "If disabled, use 'net ' prefix to trigger web search."
+      defaultValue: "false"
+  - type: checkbox
+    attributes:
+      name: enable_thinking
+      label: "Enable thinking/reasoning:"
+      description: "Request and display model's reasoning process (for supported models)."
+      defaultValue: "true"
+  - type: checkbox
+    attributes:
+      name: use_system_proxy
+      label: "Use system proxy:"
+      description: "Enable if you need to access API through a proxy."
+      defaultValue: "false"
+  - type: input
+    attributes:
+      name: response_preview_length
+      label: "Response preview length:"
+      defaultValue: "160"
+      description: "Characters shown in the result title."
+  - type: textarea
+    attributes:
+      name: system_prompt
+      label: "System Prompt:"
+      defaultValue: "You are a helpful assistant."
+      description: "Customize the AI's system prompt to define its behavior and role."

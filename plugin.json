@@ -1,0 +1,12 @@
+{
+    "$schema": "https://www.flowlauncher.com/schemas/plugin.schema.json",
+    "Name": "Ask I Want",
+    "Description": "Multi-provider AI assistant (Ollama/OpenAI/DeepSeek) with web search and thinking mode",
+    "Author": "Bowie And Chumenta",
+    "Version": "1.1.2",
+    "Language": "python",
+    "Website": "https://github.com/QWXL/ask-i-want-plugin",
+    "IcoPath": "icon.png",
+    "ExecuteFileName": "main.py",
+    "ActionKeyword": "ask"
+}
