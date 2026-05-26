@@ -7,7 +7,6 @@ from typing import Any, Dict, List
 
 PLUGIN_DIR = os.path.dirname(__file__)
 PLUGIN_NAME = os.path.basename(PLUGIN_DIR)
-PLUGIN_ID = "7c0f4fd6-64b7-4d4e-8d7b-7f6d4b54b0a3"
 
 LIB_DIR = os.path.join(PLUGIN_DIR, "lib")
 if os.path.isdir(LIB_DIR):
@@ -339,9 +338,6 @@ def load_settings_fallback() -> Dict[str, Any]:
             os.path.join(
                 appdata, "FlowLauncher", "Settings", "Plugins", "Ask AI", "settings.json"
             ),
-            os.path.join(
-                appdata, "FlowLauncher", "Settings", "Plugins", PLUGIN_ID, "settings.json"
-            ),
         ])
     
     # Linux paths
@@ -350,7 +346,6 @@ def load_settings_fallback() -> Dict[str, Any]:
         candidates.extend([
             os.path.join(home, ".config", "FlowLauncher", "Settings", "Plugins", PLUGIN_NAME, "settings.json"),
             os.path.join(home, ".config", "FlowLauncher", "Settings", "Plugins", "Ask I Want", "settings.json"),
-            os.path.join(home, ".config", "FlowLauncher", "Settings", "Plugins", PLUGIN_ID, "settings.json"),
         ])
     
     for path in candidates:
