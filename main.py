@@ -30,6 +30,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "model": "qwen3:4b",
     "api_base_url": "http://localhost:11434",
     "api_key": "",
+    "api_type": "ollama",
     "tavily_api_key": "",
     "tavily_timeout": 20,
     "max_results": 3,
@@ -151,12 +152,16 @@ def extract_thinking(response: Dict[str, Any], provider: str = "ollama") -> str:
 
 class ChatProvider:
     """Unified chat provider supporting multiple APIs"""
-    
+
+    _OLLAMA_ENDPOINT = "/api/chat"
+    _OPENAI_ENDPOINT = "/v1/chat/completions"
+
     def __init__(
         self,
         model: str,
         base_url: str,
         api_key: str = "",
+        api_type: str = "ollama",
         timeout: int = 60,
         use_proxy: bool = False,
     ):
@@ -165,24 +170,19 @@ class ChatProvider:
         self.api_key = api_key
         self.timeout = timeout
         self.use_proxy = use_proxy
-        
-        # Auto-detect provider based on URL
-        self.is_ollama = self._is_ollama_url(base_url)
-        
+
+        self.is_ollama = (api_type == "ollama")
+
         if self.is_ollama:
-            self.endpoint = "/api/chat"
+            self.endpoint = self._OLLAMA_ENDPOINT
             self.provider_name = "ollama"
-        else:
-            self.endpoint = "/v1/chat/completions"
+        elif api_type == "openai_compatible":
+            self.endpoint = self._OPENAI_ENDPOINT
             self.provider_name = "openai-compatible"
             if not self.api_key:
                 raise ValueError("API key is required for cloud providers")
-    
-    @staticmethod
-    def _is_ollama_url(url: str) -> bool:
-        """Check if URL is a local Ollama instance"""
-        url_lower = url.lower()
-        return "localhost" in url_lower or "127.0.0.1" in url_lower or "0.0.0.0" in url_lower
+        else:
+            raise ValueError(f"Unknown api_type: {api_type}")
     
     def chat(
         self,
@@ -385,6 +385,7 @@ class OllamaWebAgent(FlowLauncher):
             "model": get_config_value(settings, "model", DEFAULT_CONFIG["model"]),
             "api_base_url": get_config_value(settings, "api_base_url", DEFAULT_CONFIG["api_base_url"]),
             "api_key": get_config_value(settings, "api_key", DEFAULT_CONFIG["api_key"]),
+            "api_type": get_config_value(settings, "api_type", DEFAULT_CONFIG["api_type"]),
             "tavily_api_key": get_config_value(settings, "tavily_api_key", DEFAULT_CONFIG["tavily_api_key"]),
             "tavily_timeout": DEFAULT_CONFIG["tavily_timeout"],
             "max_results": get_config_value(settings, "max_results", DEFAULT_CONFIG["max_results"]),
@@ -394,7 +395,13 @@ class OllamaWebAgent(FlowLauncher):
             "response_preview_length": get_config_value(settings, "response_preview_length", DEFAULT_CONFIG["response_preview_length"]),
             "system_prompt": get_config_value(settings, "system_prompt", DEFAULT_CONFIG["system_prompt"]),
         }
-        
+
+        # Backward compatibility: auto-detect api_type from URL if not set
+        if "api_type" not in settings or not settings.get("api_type"):
+            base_url = cfg["api_base_url"].lower()
+            if "localhost" in base_url or "127.0.0.1" in base_url or "0.0.0.0" in base_url:
+                cfg["api_type"] = "ollama"
+
         # Backward compatibility
         # Use old show_thinking/thinking_mode if enable_thinking not set
         if "enable_thinking" not in settings or settings.get("enable_thinking") is None:
@@ -427,6 +434,7 @@ class OllamaWebAgent(FlowLauncher):
                 model=cfg.get("model"),
                 base_url=cfg.get("api_base_url"),
                 api_key=cfg.get("api_key", ""),
+                api_type=cfg.get("api_type", DEFAULT_CONFIG["api_type"]),
                 use_proxy=to_bool(cfg.get("use_system_proxy")),
             )
         except ValueError as e:
@@ -703,8 +711,7 @@ class OllamaWebAgent(FlowLauncher):
             answer = self._chat_with_tools(query, cfg, use_tools=use_tools)
         except Exception as exc:
             message = str(exc).strip()
-            base_url = cfg.get("api_base_url", "")
-            is_ollama = "localhost" in base_url.lower() or "127.0.0.1" in base_url.lower()
+            is_ollama = cfg.get("api_type", DEFAULT_CONFIG["api_type"]) == "ollama"
 
             if "model" in message.lower() and "not" in message.lower() and "found" in message.lower():
                 if is_ollama:
@@ -824,7 +831,7 @@ class OllamaWebAgent(FlowLauncher):
     def _build_subtitle(self, elapsed: float, cfg, use_tools: bool, query: str) -> str:
         label = ""
         if use_tools:
-            label = "已联网搜索" if self._is_chinese(query) else "Web search used"
+            label = "Web search used"
         parts = [f"{elapsed:.1f}s"]
         parts.append(cfg.get("model"))
 
@@ -833,13 +840,6 @@ class OllamaWebAgent(FlowLauncher):
             
         parts.append("Enter to Close")
         return " | ".join(parts)
-
-    def _is_chinese(self, text: str) -> bool:
-        for ch in text:
-            if "\u4e00" <= ch <= "\u9fff":
-                return True
-        return False
-
 
 if __name__ == "__main__":
     OllamaWebAgent()

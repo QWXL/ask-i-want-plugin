@@ -1,5 +1,6 @@
 {
     "$schema": "https://www.flowlauncher.com/schemas/plugin.schema.json",
+    "ID": "7f3c2d9e-8b41-4c7a-a9f2-6d18e5b73c4f",
     "Name": "Ask I Want",
     "Description": "Multi-provider AI assistant (Ollama/OpenAI/DeepSeek) with web search and thinking mode",
     "Author": "Bowie And Chumenta",

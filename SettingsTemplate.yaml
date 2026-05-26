@@ -11,12 +11,21 @@ body:
       label: "API Base URL:"
       defaultValue: "http://localhost:11434"
       description: "API endpoint. Ollama: http://localhost:11434 | OpenAI: https://api.openai.com | DeepSeek: https://api.deepseek.com"
+  - type: dropdown
+    attributes:
+      name: api_type
+      label: "API Type:"
+      defaultValue: "ollama"
+      options:
+        - "ollama"
+        - "openai_compatible"
+      description: "Ollama uses native /api/chat endpoint. OpenAI Compatible uses /v1/chat/completions with Bearer auth."
   - type: input
     attributes:
       name: api_key
       label: "API Key:"
       defaultValue: ""
-      description: "Required for cloud providers (OpenAI, DeepSeek, etc.). Leave empty for local Ollama."
+      description: "Required when API Type is openai_compatible (OpenAI, DeepSeek, etc.). Leave empty for Ollama."
   - type: input
     attributes:
       name: tavily_api_key
